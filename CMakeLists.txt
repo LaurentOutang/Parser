@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.5)
 
 project(Parser LANGUAGES CXX)
 
@@ -7,14 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_HEADERS 
 AbstractParser.h  SharedParser.h	  SqlParser.h	TestToken.h
-CppParser.h	  SqlCreateDefinition.h   State.h	Token.h
+CppParser.h	  SqlCreateDefinitionParser.h   State.h	Token.h
 Lexer.h		  SqlCreateTableParser.h  TestLexer.h
 Parser.h	  SqlLexer.h		  TestParser.h
 )
 
 set(PROJECT_SOURCES 
 AbstractParser.cpp  SharedParser.cpp	      SqlParser.cpp   Token.cpp
-CppParser.cpp	    SqlCreateDefinition.cpp   State.cpp       main.cpp
+CppParser.cpp	    SqlCreateDefinitionParser.cpp   State.cpp       main.cpp
 Lexer.cpp	    SqlCreateTableParser.cpp  TestLexer.cpp
 Parser.cpp	    SqlLexer.cpp	      TestParser.cpp
 )
