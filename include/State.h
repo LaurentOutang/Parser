@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <memory>
 #include "Token.h"
 
 struct AcceptorResult
@@ -19,7 +20,7 @@ using Action = std::function<void(std::string_view const&)>;
 
 struct Cursor
 {
-	State const * const state;
+	State const * state;
 	Tokens::const_iterator head;
 };
 
@@ -29,10 +30,10 @@ class State
 public:
 
 	State();
-	void add(Acceptor, State const&, Action = Action());
+	void add(uint64_t, Acceptor, State const&);
 	void addEpsilon(State const&);
-	std::vector<Cursor> getNextCursors(Cursor const& current) const;
+	std::vector<Cursor> getNextCursors(Cursor const& current, Tokens const& token) const;
 private:
-	std::vector<std::tuple<Acceptor,State const * const, Action>> m_nexts;
+	std::vector<std::tuple<uint64_t, Acceptor, State const * const>> m_nexts;//First param must be the count of tokens accepted by Acceptor
 };
 

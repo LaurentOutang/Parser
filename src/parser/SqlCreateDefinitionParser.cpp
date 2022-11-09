@@ -1,5 +1,6 @@
-#pragma once
-#include "AbstractParser.h"
+#include "../../include/parser/SqlCreateDefinitionParser.h"
+#include "../../include/SqlTokens.h"
+#include <vector>
 
 inline std::vector<std::string_view> reserved_keywords{
     "CREATE",
@@ -26,51 +27,7 @@ inline std::vector<std::string_view> reserved_keywords{
     "BYTEA"
 };
 
-inline std::vector<std::string_view> single_identifier_types{
-    "BIGINT",
-    "BOOLEAN",
-    "BOX",
-    "BYTEA",
-    "CIDR",
-    "CIRCLE",
-    "DATE",
-    "INET",
-    "INTEGER",
-    "JSON",
-    "JSONB",
-    "LINE",
-    "LSEG",
-    "MACADDR",
-    "MONEY",
-    "PATH",
-    "PG_LSN",
-    "POINT",
-    "POLYGON",
-    "REAL",
-    "SMALLINT",
-    "SMALLSERIAL",
-    "SERIAL",
-    "TEXT",
-    "TSQUERY",
-    "TSVECTOR",
-    "TXID_SNAPSHOT",
-    "UUID",
-    "XML",
-    "INT8",
-    "SERIAL8",
-    "BOOL",
-    "FLOAT8",
-    "INT",
-    "INT4",
-    "FLOAT4",
-    "INT2",
-    "SERIAL2",
-    "SERIAL4",
-    "BIGSERIAL",
-    "TIMETZ",
-    "TIMESTAMPTZ",
-    "VARCHAR"
-};
+
 
 inline std::vector<std::string_view> double_identifier_types{
     "double precision"
@@ -103,87 +60,10 @@ inline std::vector<std::string_view> interval_type{
     "interval"
 };
 
-struct isSingleIdentifierTypes
+
+/* struct DefaultValueAcceptator
 {
-    bool operator()(std::string_view const& str);
-};
-
-struct isDoubleIdentifierTypes
-{
-    bool operator()(std::string_view const& str);
-};
-
-struct isSingleIdentifierSizedTypes
-{
-    bool operator()(std::string_view const& str);
-};
-
-struct isSingleIdentifierDoubleSizedTypes
-{
-    bool operator()(std::string_view const& str);
-};
-
-struct isDoubleIdentifierSizedTypes
-{
-    bool operator()(std::string_view const& str);
-};
-
-struct isNotReserved
-{
-    bool operator()(std::string_view const& str);
-};
-
-template<typename StringCondition>
-struct acceptPublicIdentifier
-{
-
-    acceptPublicIdentifier(Tokens::const_iterator end) : m_end(end) {}
-
-    AcceptorResult operator()(Cursor const& cursor) {
-        auto currentToken = cursor.head;
-        StringCondition cond;
-        if (currentToken != m_end && currentToken->type == TokenType::IDENTIFIER && cond(currentToken->str))
-        {
-            Tokens::const_iterator next = cursor.head;
-            ++next;
-            return AcceptorResult{ .accepted = true, .next = next };
-        }
-        else return AcceptorResult{ .accepted = false, .next = cursor.head };
-    };
-private:
-    Tokens::const_iterator m_end;
-};
-
-using CreateToken = Pack<TokenType::IDENTIFIER, "CREATE">;
-using TableToken = Pack<TokenType::IDENTIFIER, "TABLE">;
-using IfToken = Pack<TokenType::IDENTIFIER, "IF">;
-using NotToken = Pack<TokenType::IDENTIFIER, "NOT">;
-using ExistsToken = Pack<TokenType::IDENTIFIER, "EXISTS">;
-using NullToken = Pack<TokenType::IDENTIFIER, "NULL">;
-using DefaultToken = Pack<TokenType::IDENTIFIER, "DEFAULT">;
-using PrimaryToken = Pack<TokenType::IDENTIFIER, "PRIMARY">;
-using KeyToken = Pack<TokenType::IDENTIFIER, "KEY">;
-using UniqueToken = Pack<TokenType::IDENTIFIER, "UNIQUE">;
-using ConstraintToken = Pack<TokenType::IDENTIFIER, "CONSTRAINT">;
-using LeftParToken = Pack<TokenType::PUNCTUATOR, "(">;
-using RightParToken = Pack<TokenType::PUNCTUATOR, ")">;
-using SemiColonToken = Pack<TokenType::PUNCTUATOR, ";">;
-using CommaToken = Pack<TokenType::PUNCTUATOR, ",">;
-
-class SqlCreateTableParser : public AbstractParser
-{
-public:
-	SqlCreateTableParser(Tokens const& tokens);
-
-    std::string_view getCurrentType() const { return m_type; }
-protected:
-    std::string_view m_type;
-};
-
-
-struct DefaultValueAcceptator
-{
-    DefaultValueAcceptator(Tokens::const_iterator end, SqlCreateTableParser* parser) : m_end(end), m_parser(parser)
+    DefaultValueAcceptator(Tokens::const_iterator end, SqlCreateDefinitionParser* parser) : m_end(end), m_parser(parser)
     {
     }
 
@@ -250,6 +130,54 @@ struct DefaultValueAcceptator
         return AcceptorResult{ .accepted = false, .next = cursor.head };
     };
 private:
-    SqlCreateTableParser* m_parser = nullptr;
+    SqlCreateDefinitionParser* m_parser = nullptr;
     Tokens::const_iterator m_end;
-};
+}; */
+
+
+SqlCreateDefinitionParser::SqlCreateDefinitionParser(Tokens const& tokens) : Parser(tokens)
+{
+    auto acceptCreateTable = acceptTokens<CreateToken, TableToken>();
+    auto acceptNotReservedPublicIdentifier = acceptPublicIdentifier<isNotReserved>();
+    auto acceptIfNotExists = acceptTokens<IfToken, NotToken, ExistsToken>();
+    auto acceptNotNull = acceptTokens<NotToken, NullToken>();
+    auto acceptDefault = acceptTokens<DefaultToken>();
+    auto acceptLeftPar = acceptTokens<LeftParToken>();
+    auto acceptRightPar = acceptTokens<RightParToken>();
+    auto acceptPrimaryKey = acceptTokens<PrimaryToken, KeyToken>();
+    auto acceptUnique = acceptTokens<UniqueToken>();
+    auto acceptConstraint = acceptTokens<ConstraintToken>();
+    auto acceptRightParSemiColon = acceptTokens<RightParToken, SemiColonToken>();
+    auto acceptPublicSingleIdentifierType = acceptPublicIdentifier<isSingleIdentifierTypes>();
+    auto acceptPublicSingleIdentifierSizedType = acceptPublicIdentifier<isSingleIdentifierSizedTypes>();
+    auto acceptInteger = IntegerAcceptor();
+    auto acceptComma = acceptTokens<CommaToken>();
+    auto acceptAnyToken = acceptAny();
+
+    State& s5 = newState();
+    State& s6 = newState();
+    State& s7 = newState();
+    State& s8 = newState();
+    State& s9 = newState();
+    State& s10 = newState();
+    State& s11 = newState();
+
+    m_init.add(1, acceptNotReservedPublicIdentifier, s5);
+
+    //Type
+    s5.add(1, acceptPublicSingleIdentifierType, s6);
+
+    //Type(Number)
+    /* s5.add(1, acceptPublicSingleIdentifierSizedType, s7);
+    s7.add(1, acceptLeftPar, s8);
+    s8.add(1, acceptInteger, s9);
+    s9.add(1, acceptRightPar, s6); */
+
+
+    s6.add(2, acceptNotNull, s10);
+    s6.addEpsilon(s10);
+    s10.add(1, acceptDefault, s11);
+    s10.addEpsilon(m_end);
+    s11.add(1, acceptAnyToken, m_end);
+    //s11.add(DefaultValueAcceptator(tokens.cend(), this), m_end);
+}

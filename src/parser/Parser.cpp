@@ -1,4 +1,4 @@
-#include "Parser.h"
+#include "../../include/parser/Parser.h"
 
 Parser::Parser(Tokens const& tokens) : AbstractParser(tokens)
 {
@@ -14,11 +14,8 @@ AbtractSyntaxTree Parser::parse()
 		nextCursors.clear();
 		for (Cursor& cursor : m_cursors)
 		{
-			std::vector<Cursor> localNextCursors = cursor.state->getNextCursors(cursor);
-			for (Cursor& localNextState : localNextCursors)
-			{
-				nextCursors.push_back(localNextState);
-			}
+			std::vector<Cursor> localNextCursors = cursor.state->getNextCursors(cursor, m_tokens);
+			nextCursors.insert(nextCursors.end(), localNextCursors.begin(), localNextCursors.end());
 		}
 		m_cursors.swap(nextCursors);
 	} while (!reachedEnd() && !m_cursors.empty());

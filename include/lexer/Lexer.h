@@ -1,5 +1,5 @@
 #pragma once
-#include "Token.h"
+#include "../Token.h"
 #include <string_view>
 
 class UnknownTokenError
@@ -40,7 +40,7 @@ protected:
 	static bool isWhiteSpace(char const c);
 	static inline const TokenResult EndTokenResult = {
 		.succeed = false,
-		.token = std::string_view()
+		.token = Token()
 	};
 protected:
 	std::string_view m_code;

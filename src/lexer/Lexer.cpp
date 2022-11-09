@@ -1,4 +1,4 @@
-#include "Lexer.h"
+#include "../../include/lexer/Lexer.h"
 
 TokenResult operator|(TokenResult const& result1, TokenResult const& result2)
 {

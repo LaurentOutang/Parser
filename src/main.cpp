@@ -1,5 +1,6 @@
-#include "SqlParser.h"
-#include "SqlLexer.h"
+#include "../../include/parser/SqlParser.h"
+#include "../../include/lexer/SqlLexer.h"
+
 #include <iostream>
 
 Tokens::const_iterator begin;
@@ -26,11 +27,16 @@ int main()
 	}
 	catch (UnknownTokenError const& unknownTokenError)
 	{
-		std::cout << "Unknown token error!! " << std::endl;
+		std::cerr << "Unknown token error!! " << std::endl;
 	}
 	catch (ParseError const& parseError)
 	{
-		std::cout << "Failed to parse !! " << std::endl;
+		std::cerr << "Failed to parse !! " << std::endl;
 	}
+	catch(...)
+	{
+		std::cerr << "Unknown exception" << std::endl;
+	}
+	std::cout << "Program finished" << std::endl;
 	return 0;
 }

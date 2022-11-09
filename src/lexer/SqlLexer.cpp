@@ -1,4 +1,4 @@
-#include "SqlLexer.h"
+#include "../../include/lexer/SqlLexer.h"
 
 SqlLexer::SqlLexer(std::string_view const& code) : Lexer(code)
 {

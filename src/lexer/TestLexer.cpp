@@ -1,5 +1,5 @@
-#include "TestLexer.h"
-#include "TestToken.h"
+#include "../../include/lexer/TestLexer.h"
+#include "../../include/TestToken.h"
 
 TestLexer::TestLexer(std::string_view code) : Lexer(code)
 {

@@ -1,4 +1,4 @@
-#include "SharedParser.h"
+#include "../../include/parser/SharedParser.h"
 
 SharedParser::SharedParser(Tokens const& token) : AbstractParser(token)
 {

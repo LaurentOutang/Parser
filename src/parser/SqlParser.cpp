@@ -1,4 +1,4 @@
-#include "SqlParser.h"
+#include "../../include/parser/SqlParser.h"
 
 SqlParser::SqlParser(Tokens const& tokens) : Parser(tokens), m_sqlCreateTableParser(tokens)
 {
