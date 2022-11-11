@@ -12,6 +12,7 @@ set(LEXER_SRC_DIR "${SOURCE_DIRECTORY}/lexer")
 set(HEADER_DIRECTORY ./include)
 set(PARSER_HEADER_DIR "${HEADER_DIRECTORY}/parser")
 set(LEXER_HEADER_DIR "${HEADER_DIRECTORY}/lexer")
+set(ACCEPTOR_HEADER_DIR "${HEADER_DIRECTORY}/acceptor")
 
 include_directories(${PARSER_HEADER_DIR})
 include_directories(${LEXER_HEADER_DIR})
@@ -23,7 +24,7 @@ set(PROJECT_HEADERS
 ${PARSER_HEADER_DIR}/AbstractParser.h               ${PARSER_HEADER_DIR}/SharedParser.h	            ${PARSER_HEADER_DIR}/SqlParser.h	${HEADER_DIRECTORY}/TestToken.h
 ${PARSER_HEADER_DIR}/SqlCreateDefinitionParser.h    ${HEADER_DIRECTORY}/State.h	                    ${HEADER_DIRECTORY}/Token.h
 ${LEXER_HEADER_DIR}/Lexer.h		                    ${PARSER_HEADER_DIR}/SqlCreateTableParser.h     ${LEXER_HEADER_DIR}/TestLexer.h
-${PARSER_HEADER_DIR}/Parser.h	                    ${LEXER_HEADER_DIR}/SqlLexer.h		            ${PARSER_HEADER_DIR}/TestParser.h
+${PARSER_HEADER_DIR}/Parser.h	                    ${LEXER_HEADER_DIR}/SqlLexer.h		            ${PARSER_HEADER_DIR}/TestParser.h   ${ACCEPTOR_HEADER_DIR}/SqlAcceptor.h
 )
 
 set(PROJECT_SOURCES 

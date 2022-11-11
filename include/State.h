@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 #include "Token.h"
+#include "acceptor/SqlAcceptor.h"
 
 struct AcceptorResult
 {
@@ -15,7 +16,6 @@ class State;
 struct Cursor;
 
 using Acceptor = std::function<AcceptorResult(Cursor const&)>;
-
 using Action = std::function<void(std::string_view const&)>;
 
 struct Cursor
