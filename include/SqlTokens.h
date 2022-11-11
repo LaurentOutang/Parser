@@ -1,20 +1,27 @@
 #pragma once
 #include "../../include/Token.h"
 
-using CreateToken = Pack<TokenType::IDENTIFIER, "CREATE">;
-using TableToken = Pack<TokenType::IDENTIFIER, "TABLE">;
-using IfToken = Pack<TokenType::IDENTIFIER, "IF">;
-using NotToken = Pack<TokenType::IDENTIFIER, "NOT">;
-using ExistsToken = Pack<TokenType::IDENTIFIER, "EXISTS">;
-using NullToken = Pack<TokenType::IDENTIFIER, "NULL">;
-using DefaultToken = Pack<TokenType::IDENTIFIER, "DEFAULT">;
-using PrimaryToken = Pack<TokenType::IDENTIFIER, "PRIMARY">;
-using KeyToken = Pack<TokenType::IDENTIFIER, "KEY">;
-using UniqueToken = Pack<TokenType::IDENTIFIER, "UNIQUE">;
-using ConstraintToken = Pack<TokenType::IDENTIFIER, "CONSTRAINT">;
-using LeftParToken = Pack<TokenType::PUNCTUATOR, "(">;
-using RightParToken = Pack<TokenType::PUNCTUATOR, ")">;
-using SemiColonToken = Pack<TokenType::PUNCTUATOR, ";">;
-using CommaToken = Pack<TokenType::PUNCTUATOR, ",">;
+
+template<StringLiteral str>
+using PackId = Pack<TokenType::IDENTIFIER, str>;
+
+template<StringLiteral str>
+using PackPunc = Pack<TokenType::PUNCTUATOR, str>;
+
+using CreateToken = PackId<"CREATE">;
+using TableToken = PackId<"TABLE">;
+using IfToken = PackId<"IF">;
+using NotToken = PackId<"NOT">;
+using ExistsToken = PackId<"EXISTS">;
+using NullToken = PackId<"NULL">;
+using DefaultToken = PackId<"DEFAULT">;
+using PrimaryToken = PackId<"PRIMARY">;
+using KeyToken = PackId<"KEY">;
+using UniqueToken = PackId<"UNIQUE">;
+using ConstraintToken = PackId<"CONSTRAINT">;
+using LeftParToken = PackPunc<"(">;
+using RightParToken = PackPunc<")">;
+using SemiColonToken = PackPunc<";">;
+using CommaToken = PackPunc<",">;
 
 

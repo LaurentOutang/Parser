@@ -9,9 +9,9 @@ TestParser::TestParser(Tokens const& tokens) : Parser(tokens)
 	using StarToken = Pack<test::TestTokenType::OPERATOR, "*">;
 	using RightParToken = Pack<test::TestTokenType::PUNCTUATOR, ")">;
 
-	auto leftParAcceptor = acceptTokens<LeftParToken>{};
-	auto chainAcceptor = acceptTokens<RightParToken, StarToken>{};
-	auto rightParAcceptor = acceptTokens<StarToken>{};
+	auto leftParAcceptor = AcceptTokens<LeftParToken>{};
+	auto chainAcceptor = AcceptTokens<RightParToken, StarToken>{};
+	auto rightParAcceptor = AcceptTokens<StarToken>{};
 
 	m_init.add(leftParAcceptor, afterLeftParState);
 	afterLeftParState.add(chainAcceptor, afterRightParOrNothingState);

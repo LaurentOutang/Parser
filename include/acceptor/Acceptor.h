@@ -1,5 +1,4 @@
-#ifndef __ACCEPTOR__
-#define __ACCEPTOR__
+#pragma once
 #include <functional>
 #include "../Token.h"
 #include "../Cursor.h"
@@ -23,56 +22,60 @@ private:
 
 };
 
-struct acceptAny : public Acceptor
+template<typename predicate, typename ... predicates>
+struct GenericAcceptor : public Acceptor
 {
-	acceptAny() : Acceptor([](Cursor const& cursor) {
-        auto currentToken = cursor.head;
-		Tokens::const_iterator next = cursor.head;
-		++next;
-		return AcceptorResult{ .accepted = true, .next = next };
-    }, 1)
-	{
+	static inline uint64_t const token_count = GenericAcceptor<predicates...>::token_count + 1;
 
-	}
-};
-
-template<typename pack, typename ... packs>
-struct acceptTokens : public Acceptor
-{
-	static inline uint64_t const token_count = acceptTokens<packs...>::token_count + 1;
-	acceptTokens() : Acceptor([](Cursor const& cursor) {
+	GenericAcceptor(int i = 0) : Acceptor([i](Cursor const& cursor) {
 		auto currentToken = cursor.head;
-		if (currentToken->type == pack::type && currentToken->str == pack::str)
+		if (predicate()(i, currentToken))
 		{
 			Tokens::const_iterator next = cursor.head;
 			++next;
-			return acceptTokens<packs...>()(Cursor(cursor.state, next));
+			return GenericAcceptor<predicates...>(i + 1)(Cursor(cursor.state, next));
 		}
-		else return AcceptorResult{ .accepted = false, .next = cursor.head };
+		return AcceptorResult{ .accepted = false, .next = cursor.head };	
 	}, token_count)
 	{
 		
 	}
 };
 
-template<typename pack>
-struct acceptTokens<pack> : public Acceptor
+template<typename predicate>
+struct GenericAcceptor<predicate> : public Acceptor
 {
 	static inline uint64_t const token_count = 1;
 
-	acceptTokens() : Acceptor([](Cursor const& cursor) {
+	GenericAcceptor(int i = 0) : Acceptor([i](Cursor const& cursor) {
 		auto currentToken = cursor.head;
-		if (currentToken->type == pack::type && currentToken->str == pack::str)
+		if (predicate()(i, currentToken))
 		{
 			Tokens::const_iterator next = cursor.head;
 			++next;
-			return AcceptorResult{ .accepted = true, .next = next };
+			return AcceptorResult {.accepted = true, .next = next};
 		}
-		else return AcceptorResult{ .accepted = false, .next = cursor.head };
+		return AcceptorResult{ .accepted = false, .next = cursor.head };	
 	}, 1)
 	{
 
 	}
 };
 
-#endif
+struct trivial_predicate
+{
+	bool operator()(int index, Tokens::const_iterator){ return true; }
+};
+
+using AcceptAny = GenericAcceptor<trivial_predicate>;
+
+template<typename pack>
+struct pack_predicate
+{
+	bool operator()(int index, Tokens::const_iterator token) { 
+		return token->type == pack::type && token->str == pack::str; 
+	}
+};
+
+template<typename ... packs>
+using AcceptTokens = GenericAcceptor<pack_predicate<packs>...>;

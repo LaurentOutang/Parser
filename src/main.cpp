@@ -8,14 +8,15 @@ Tokens::const_iterator begin;
 int main()
 {
 	std::string code =	"CREATE TABLE maTable IF NOT EXISTS			     \n("
-						"id SERIAL,"
+						"id INTEGER,"
+						"height NUMERIC(2,3) NOT NULL DEFAULT 2.3,"
+						"age SERIAL DEFAULT 3,"
+						"blabla REAL,"
+						"weight DOUBLE PRECISION NOT NULL DEFAULT .22"
+						/* "id SERIAL,"
 						"age INTEGER NOT NULL DEFAULT 23,"
-						"nom VARCHAR"
-						"); \n";/*
-						"(\n"
-						"mon_nom_de_variable BIGINT NOT NULL,\n"
-						"voiliVoilou BOOLEAN\n"
-						");";*/
+						"nom VARCHAR" */
+						"); \n";
 
 	SqlLexer lexer(code);
 	try

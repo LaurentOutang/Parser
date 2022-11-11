@@ -14,7 +14,7 @@ SqlCreateTableParser::SqlCreateTableParser(Tokens const& tokens) :
     State& s13 = newState();
 
     m_init.add(SqlAcceptor::createTable, s1);
-    s1.add(SqlAcceptor::notReservedPublicIdentifier, s2);
+    s1.add(SqlAcceptor::freeIdentifier, s2);
     s2.add(SqlAcceptor::ifNotExists, s3);
     s2.addEpsilon(s3);
     s3.add(SqlAcceptor::leftPar, parAfterCreateTable);
