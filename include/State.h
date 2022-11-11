@@ -4,25 +4,9 @@
 #include <functional>
 #include <memory>
 #include "Token.h"
-#include "acceptor/SqlAcceptor.h"
+#include "acceptor/Acceptor.h"
 
-struct AcceptorResult
-{
-	bool accepted;
-	Tokens::const_iterator next;
-};
 
-class State;
-struct Cursor;
-
-using Acceptor = std::function<AcceptorResult(Cursor const&)>;
-using Action = std::function<void(std::string_view const&)>;
-
-struct Cursor
-{
-	State const * state;
-	Tokens::const_iterator head;
-};
 
 class State
 {
@@ -30,10 +14,13 @@ class State
 public:
 
 	State();
-	void add(uint64_t, Acceptor, State const&);
+	void add(Acceptor const&, State const&);
 	void addEpsilon(State const&);
 	std::vector<Cursor> getNextCursors(Cursor const& current, Tokens const& token) const;
 private:
-	std::vector<std::tuple<uint64_t, Acceptor, State const * const>> m_nexts;//First param must be the count of tokens accepted by Acceptor
+	std::vector<std::tuple<Acceptor const*, State const * const>> m_nexts;//First param must be the count of tokens accepted by Acceptor
+
+    static inline AcceptorFunc const epsilon_func = [](Cursor const& cursor) -> AcceptorResult { return AcceptorResult { .accepted = true, .next = cursor.head }; };
+	static inline Acceptor const epsilon_acceptor = Acceptor(State::epsilon_func, 0);
 };
 

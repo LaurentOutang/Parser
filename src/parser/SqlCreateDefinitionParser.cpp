@@ -73,10 +73,10 @@ SqlCreateDefinitionParser::SqlCreateDefinitionParser(Tokens const& tokens) : Par
     State& s10 = newState();
     State& s11 = newState();
 
-    m_init.add(1, SqlAcceptor::notReservedPublicIdentifier, s5);
+    m_init.add(SqlAcceptor::notReservedPublicIdentifier, s5);
 
     //Type
-    s5.add(1, SqlAcceptor::publicSingleIdentifierType, s6);
+    s5.add(SqlAcceptor::publicSingleIdentifierType, s6);
 
     //Type(Number)
     /* s5.add(1, acceptPublicSingleIdentifierSizedType, s7);
@@ -85,10 +85,10 @@ SqlCreateDefinitionParser::SqlCreateDefinitionParser(Tokens const& tokens) : Par
     s9.add(1, acceptRightPar, s6); */
 
 
-    s6.add(2, SqlAcceptor::notNull, s10);
+    s6.add(SqlAcceptor::notNull, s10);
     s6.addEpsilon(s10);
-    s10.add(1, SqlAcceptor::Default, s11);
+    s10.add(SqlAcceptor::Default, s11);
     s10.addEpsilon(m_end);
-    s11.add(1, SqlAcceptor::anyToken, m_end);
+    s11.add(SqlAcceptor::anyToken, m_end);
     //s11.add(DefaultValueAcceptator(tokens.cend(), this), m_end);
 }

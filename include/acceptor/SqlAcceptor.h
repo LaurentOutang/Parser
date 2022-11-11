@@ -1,8 +1,6 @@
-#ifndef __SQLACCEPTOR__
-#define __SQLACCEPTOR__
-#include "../State.h"
+#pragma once
 #include "../SqlTokens.h"
-
+#include "../State.h"
 
 struct isSingleIdentifierTypes
 {
@@ -53,9 +51,9 @@ struct isNotReserved
 };
 
 template<typename StringCondition>
-struct acceptPublicIdentifier
+struct acceptPublicIdentifier : public Acceptor
 {
-    AcceptorResult operator()(Cursor const& cursor) {
+	acceptPublicIdentifier() : Acceptor([](Cursor const& cursor) {
         auto currentToken = cursor.head;
         StringCondition cond;
         if (currentToken->type == TokenType::IDENTIFIER && cond(currentToken->str))
@@ -65,52 +63,15 @@ struct acceptPublicIdentifier
             return AcceptorResult{ .accepted = true, .next = next };
         }
         else return AcceptorResult{ .accepted = false, .next = cursor.head };
-    };
-};
+    }, 1)
+	{
 
-struct acceptAny
-{
-    AcceptorResult operator()(Cursor const& cursor) {
-        auto currentToken = cursor.head;
-		Tokens::const_iterator next = cursor.head;
-		++next;
-		return AcceptorResult{ .accepted = true, .next = next };
-    };
-};
-
-template<typename pack, typename ... packs>
-struct acceptTokens
-{
-	AcceptorResult operator()(Cursor const& cursor) {
-		auto currentToken = cursor.head;
-		if (currentToken->type == pack::type && currentToken->str == pack::str)
-		{
-			Tokens::const_iterator next = cursor.head;
-			++next;
-			return acceptTokens<packs...>()(Cursor(cursor.state, next));
-		}
-		else return AcceptorResult{ .accepted = false, .next = cursor.head };
 	}
 };
 
-template<typename pack>
-struct acceptTokens<pack>
+struct IntegerAcceptor : public Acceptor
 {
-	AcceptorResult operator()(Cursor const& cursor) {
-		auto currentToken = cursor.head;
-		if (currentToken->type == pack::type && currentToken->str == pack::str)
-		{
-			Tokens::const_iterator next = cursor.head;
-			++next;
-			return AcceptorResult{ .accepted = true, .next = next };
-		}
-		else return AcceptorResult{ .accepted = false, .next = cursor.head };
-	};
-};
-
-struct IntegerAcceptor
-{
-	AcceptorResult operator()(Cursor const& cursor) {
+	IntegerAcceptor() : Acceptor([](Cursor const& cursor) {
 		auto currentToken = cursor.head;
 		if (currentToken->type == TokenType::INTEGER)
 		{
@@ -119,31 +80,77 @@ struct IntegerAcceptor
 			return AcceptorResult{ .accepted = true, .next = next };
 		}
 		else return AcceptorResult{ .accepted = false, .next = cursor.head };
-	};
+	}, 1)
+	{
+
+	}
 };
 
 struct SqlAcceptor
 {
-    static acceptAny anyToken;
+    static inline acceptAny anyToken;
 
-    static IntegerAcceptor integer;
-    static acceptTokens<CommaToken> comma;
-    static acceptTokens<UniqueToken> unique;
-    static acceptTokens<DefaultToken> Default;
-    static acceptTokens<LeftParToken> leftPar;
-    static acceptTokens<RightParToken> rightPar;
-    static acceptTokens<ConstraintToken> constraint;
+    static inline IntegerAcceptor integer;
+    static inline acceptTokens<CommaToken> comma;
+    static inline acceptTokens<UniqueToken> unique;
+    static inline acceptTokens<DefaultToken> Default;
+    static inline acceptTokens<LeftParToken> leftPar;
+    static inline acceptTokens<RightParToken> rightPar;
+    static inline acceptTokens<ConstraintToken> constraint;
 
-    static acceptTokens<NotToken, NullToken> notNull;
-    static acceptTokens<CreateToken, TableToken> createTable;
-    static acceptTokens<PrimaryToken, KeyToken> primaryKey;
-    static acceptTokens<IfToken, NotToken, ExistsToken> ifNotExists;
-    static acceptTokens<IfToken, NotToken, ExistsToken> ifNotExists;
-    static acceptTokens<RightParToken, SemiColonToken> rightParSemiColon;
+    static inline acceptTokens<NotToken, NullToken> notNull;
+    static inline acceptTokens<CreateToken, TableToken> createTable;
+    static inline acceptTokens<PrimaryToken, KeyToken> primaryKey;
+    static inline acceptTokens<IfToken, NotToken, ExistsToken> ifNotExists;
+    static inline acceptTokens<RightParToken, SemiColonToken> rightParSemiColon;
 
-    static acceptPublicIdentifier<isNotReserved> notReservedPublicIdentifier;
-    static acceptPublicIdentifier<isSingleIdentifierTypes> publicSingleIdentifierType;
-    static acceptPublicIdentifier<isSingleIdentifierSizedTypes> publicSingleIdentifierSizedType;
+    static inline acceptPublicIdentifier<isNotReserved> notReservedPublicIdentifier;
+    static inline acceptPublicIdentifier<isSingleIdentifierTypes> publicSingleIdentifierType;
+    static inline acceptPublicIdentifier<isSingleIdentifierSizedTypes> publicSingleIdentifierSizedType;
+
+	static inline std::vector<std::string_view> single_identifier_types{
+		"BIGINT",
+		"BOOLEAN",
+		"BOX",
+		"BYTEA",
+		"CIDR",
+		"CIRCLE",
+		"DATE",
+		"INET",
+		"INTEGER",
+		"JSON",
+		"JSONB",
+		"LINE",
+		"LSEG",
+		"MACADDR",
+		"MONEY",
+		"PATH",
+		"PG_LSN",
+		"POINT",
+		"POLYGON",
+		"REAL",
+		"SMALLINT",
+		"SMALLSERIAL",
+		"SERIAL",
+		"TEXT",
+		"TSQUERY",
+		"TSVECTOR",
+		"TXID_SNAPSHOT",
+		"UUID",
+		"XML",
+		"INT8",
+		"SERIAL8",
+		"BOOL",
+		"FLOAT8",
+		"INT",
+		"INT4",
+		"FLOAT4",
+		"INT2",
+		"SERIAL2",
+		"SERIAL4",
+		"BIGSERIAL",
+		"TIMETZ",
+		"TIMESTAMPTZ",
+		"VARCHAR"
+	};
 };
-
-#endif

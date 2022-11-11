@@ -1,4 +1,5 @@
 #include "../../include/parser/TestParser.h"
+#include "../../include/acceptor/Acceptor.h"
 
 TestParser::TestParser(Tokens const& tokens) : Parser(tokens)
 {
@@ -12,9 +13,9 @@ TestParser::TestParser(Tokens const& tokens) : Parser(tokens)
 	auto chainAcceptor = acceptTokens<RightParToken, StarToken>{};
 	auto rightParAcceptor = acceptTokens<StarToken>{};
 
-	m_init.add(1, leftParAcceptor, afterLeftParState);
-	afterLeftParState.add(2,  chainAcceptor, afterRightParOrNothingState);
-	afterLeftParState.add(1, rightParAcceptor, afterRightParOrNothingState);
+	m_init.add(leftParAcceptor, afterLeftParState);
+	afterLeftParState.add(chainAcceptor, afterRightParOrNothingState);
+	afterLeftParState.add(rightParAcceptor, afterRightParOrNothingState);
 	afterRightParOrNothingState.addEpsilon(m_end);
 	afterRightParOrNothingState.addEpsilon(m_init);
 }

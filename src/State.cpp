@@ -6,14 +6,14 @@ State::State()
 }
 
 
-void State::add(uint64_t token_count, Acceptor acceptor, State const& state)
+void State::add(Acceptor const& acceptor, State const& state)
 {
-	m_nexts.emplace_back(std::make_tuple(token_count, acceptor, &state));
+	m_nexts.emplace_back(std::make_tuple(&acceptor, &state));
 }
 
 void State::addEpsilon(State const& state)
 {
-	m_nexts.emplace_back(std::make_tuple(0, [](Cursor const& cursor) { return AcceptorResult{ .accepted = true, .next = cursor.head }; }, &state));
+	m_nexts.emplace_back(std::make_tuple(&State::epsilon_acceptor, &state));
 }
 
 std::vector<Cursor> State::getNextCursors(Cursor const& current, Tokens const& tokens) const
@@ -21,14 +21,15 @@ std::vector<Cursor> State::getNextCursors(Cursor const& current, Tokens const& t
 	std::vector<Cursor> nextCursors;
 	for (auto& cursor : m_nexts)
 	{
-		auto token_count = std::get<uint64_t>(cursor);
+		auto const acceptor = *std::get<Acceptor const*>(cursor);
+		auto token_count = acceptor.getTokenCount();
 		if(token_count > tokens.cend() - current.head)//No enough tokens to accept
 		{
 			continue;
 		}
 		
 		//Here we are sure that we can increment current.head at least token_count times
-		AcceptorResult result = std::get<Acceptor>(cursor)(current);
+		AcceptorResult result = acceptor(current);
 		
 		//If the next state is accepted
 		if (result.accepted)
