@@ -38,6 +38,5 @@ int main()
 	{
 		std::cerr << "Unknown exception" << std::endl;
 	}
-	std::cout << "Program finished" << std::endl;
 	return 0;
 }

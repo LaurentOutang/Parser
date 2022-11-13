@@ -5,25 +5,15 @@ SqlCreateTableParser::SqlCreateTableParser(Tokens const& tokens) :
     AbstractParser(tokens),
     m_createDefinitionParser(tokens)
 {
-    State& s1 = newState();
-    State& s2 = newState();
-    State& s3 = newState();
-    State& parAfterCreateTable = newState();
-    
-    State& s12 = newState();
-    State& s13 = newState();
-
-    m_init.add(SqlAcceptor::createTable, s1);
-    s1.add(SqlAcceptor::freeIdentifier, s2);
-    s2.add(SqlAcceptor::ifNotExists, s3);
-    s2.addEpsilon(s3);
-    s3.add(SqlAcceptor::leftPar, parAfterCreateTable);
-
-    parAfterCreateTable.addEpsilon(m_createDefinitionParser.getInit());
-    m_createDefinitionParser.getEnd().addEpsilon(s12);
-
-    s12.add(SqlAcceptor::comma, parAfterCreateTable);
-    s12.add(SqlAcceptor::rightParSemiColon, s13);
-    s13.addEpsilon(m_init);
-    s13.addEpsilon(m_end);
+    connect("init", "create_table", SqlAcceptor::createTable);
+    connect("create_table", "table_name", SqlAcceptor::freeIdentifier);
+    connect("table_name", "if_not_exists", SqlAcceptor::ifNotExists);
+    connect("table_name", "if_not_exists");
+    connect("if_not_exists", "left_par_create_table", SqlAcceptor::leftPar);
+    connect("left_par_create_table", "create_definition", m_createDefinitionParser);
+    connect("create_definition", "comma_create_definition", SqlAcceptor::comma);
+    connect("create_definition", "right_par_semi_colon", SqlAcceptor::rightParSemiColon);
+    connect("comma_create_definition", "left_par_create_table");
+    connect("right_par_semi_colon", "init");
+    connect("right_par_semi_colon", "end");
 }

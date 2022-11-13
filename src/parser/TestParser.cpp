@@ -3,7 +3,7 @@
 
 TestParser::TestParser(Tokens const& tokens) : Parser(tokens)
 {
-	State& afterLeftParState = newState();
+	/* State& afterLeftParState = newState();
 	State& afterRightParOrNothingState = newState();
 	using LeftParToken = Pack<test::TestTokenType::PUNCTUATOR, "(">;
 	using StarToken = Pack<test::TestTokenType::OPERATOR, "*">;
@@ -17,5 +17,5 @@ TestParser::TestParser(Tokens const& tokens) : Parser(tokens)
 	afterLeftParState.add(chainAcceptor, afterRightParOrNothingState);
 	afterLeftParState.add(rightParAcceptor, afterRightParOrNothingState);
 	afterRightParOrNothingState.addEpsilon(m_end);
-	afterRightParOrNothingState.addEpsilon(m_init);
+	afterRightParOrNothingState.addEpsilon(m_init); */
 }

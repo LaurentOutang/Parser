@@ -1,5 +1,7 @@
 #pragma once
 #include "../State.h"
+#include <string>
+#include <map>
 
 class ParseError {};
 
@@ -17,10 +19,13 @@ public:
 	State& getInit() const { return m_init; }
 	State& getEnd() const { return m_end; }
 protected:
-	State& newState();
-	Tokens const& m_tokens;
+	void connect(std::string source, std::string sink, Acceptor const& acceptor);
+	void connect(std::string source, std::string sink);
+	void connect(std::string source, std::string sink, AbstractParser const& parser);
+protected:
+	Tokens const& m_tokens;	
 private:	
-	std::vector<std::shared_ptr<State>> m_states;
+	std::map<std::string, std::shared_ptr<State>> m_states = {{"init", std::make_shared<State>()}, {"end", std::make_shared<State>()}};
 protected:
 	State& m_init;
 	State& m_end;
