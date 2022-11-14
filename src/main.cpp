@@ -9,7 +9,7 @@ int main()
 {
 	std::string code =	"CREATE TABLE maTable IF NOT EXISTS			     \n("
 						"id INTEGER,"
-						"height NUMERIC(2,3) NOT NULL DEFAULT 2.3,"
+						//"height NUMERIC(2,3) NOT NULL DEFAULT 2.3,"
 						"age SERIAL DEFAULT 3,"
 						"blabla REAL,"
 						"weight DOUBLE PRECISION NOT NULL DEFAULT .22"

@@ -21,10 +21,10 @@ Tokens SqlLexer::tokenize()
 
 TokenResult SqlLexer::readToken()
 {
-	return Lexer::readNumber() | 
-		Lexer::readLiteral() | 
+	return Lexer::readNumber() |
 		Lexer::readNonNumericStartingIdenfitier() | 
 		Lexer::readPunctuator() |
-		Lexer::readWhiteSpaces() |
+		Lexer::readWhiteSpaces() |		
+		Lexer::readLiteral() | 
 		EndTokenResult;
 }

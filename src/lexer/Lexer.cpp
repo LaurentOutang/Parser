@@ -46,11 +46,13 @@ TokenResult Lexer::readLiteral()
 			if (*beg == '\\')
 			{
 				escaped = true;
+				++beg;
 				continue;
 			}
 			else if (*beg == '"' && !escaped)
 				quoteEnded = true;
 			escaped = false;
+			++beg;
 		}
 	}
 	return TokenResult{
