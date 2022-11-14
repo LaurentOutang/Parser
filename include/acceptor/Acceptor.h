@@ -27,13 +27,13 @@ struct GenericAcceptor : public Acceptor
 {
 	static inline uint64_t const token_count = GenericAcceptor<predicates...>::token_count + 1;
 
-	GenericAcceptor(int i = 0) : Acceptor([i](Cursor const& cursor) {
+	GenericAcceptor() : Acceptor([](Cursor const& cursor) {
 		auto currentToken = cursor.head;
-		if (predicate()(i, currentToken))
+		if (predicate()(currentToken))
 		{
 			Tokens::const_iterator next = cursor.head;
 			++next;
-			return GenericAcceptor<predicates...>(i + 1)(Cursor(cursor.state, next));
+			return GenericAcceptor<predicates...>()(Cursor(cursor.state, next));
 		}
 		return AcceptorResult{ .accepted = false, .next = cursor.head };	
 	}, token_count)
@@ -47,9 +47,9 @@ struct GenericAcceptor<predicate> : public Acceptor
 {
 	static inline uint64_t const token_count = 1;
 
-	GenericAcceptor(int i = 0) : Acceptor([i](Cursor const& cursor) {
+	GenericAcceptor() : Acceptor([](Cursor const& cursor) {
 		auto currentToken = cursor.head;
-		if (predicate()(i, currentToken))
+		if (predicate()(currentToken))
 		{
 			Tokens::const_iterator next = cursor.head;
 			++next;
@@ -64,7 +64,7 @@ struct GenericAcceptor<predicate> : public Acceptor
 
 struct trivial_predicate
 {
-	bool operator()(int index, Tokens::const_iterator){ return true; }
+	bool operator()(Tokens::const_iterator){ return true; }
 };
 
 using AcceptAny = GenericAcceptor<trivial_predicate>;
@@ -72,7 +72,7 @@ using AcceptAny = GenericAcceptor<trivial_predicate>;
 template<typename pack>
 struct pack_predicate
 {
-	bool operator()(int index, Tokens::const_iterator token) { 
+	bool operator()(Tokens::const_iterator token) { 
 		return token->type == pack::type && token->str == pack::str; 
 	}
 };

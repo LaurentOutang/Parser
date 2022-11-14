@@ -24,7 +24,7 @@ protected:
 	void connect(std::string source, std::string sink, AbstractParser const& parser);
 protected:
 	Tokens const& m_tokens;	
-private:	
+private:
 	std::map<std::string, std::shared_ptr<State>> m_states = {{"init", std::make_shared<State>()}, {"end", std::make_shared<State>()}};
 protected:
 	State& m_init;
