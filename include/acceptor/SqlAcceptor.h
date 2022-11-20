@@ -5,25 +5,30 @@
 
 struct SqlAcceptor
 {
-    private:
-	struct integer_predicate
+	struct IntegerAcceptor : public GenericAcceptor
 	{
-		bool operator()(int index, Tokens::const_iterator token){ return token->type == TokenType::INTEGER; }
-	};
-	using IntegerAcceptor = GenericAcceptor<integer_predicate>;
+		IntegerAcceptor() : GenericAcceptor({std::make_shared<std::vector<std::function<bool(Tokens::const_iterator)>>>( {
+			[](Tokens::const_iterator token) { return token->type == TokenType::INTEGER; }
+		})})
+		{
+		}
+	} INTEGER_ACCEPTOR;
 
-	struct arbitrary_precision_number_predicate
+	struct ArbitraryPrecisionNumberAcceptor : public GenericAcceptor
 	{
-		bool operator()(int index, Tokens::const_iterator token){ 
-			return token->type == TokenType::INTEGER || 
-			token->type == TokenType::FLOATING ||
-			token->type == TokenType::LITERAL && (token->str == "Nan" || token->str == "Infinity" || token->str == "-Infinity"); }
-	};
-	using ArbitraryPrecisionNumberAcceptor = GenericAcceptor<arbitrary_precision_number_predicate>;
+		ArbitraryPrecisionNumberAcceptor() : GenericAcceptor({std::make_shared<std::vector<std::function<bool(Tokens::const_iterator)>>>( {
+			[](Tokens::const_iterator token) { return token->type == TokenType::INTEGER || 
+				token->type == TokenType::FLOATING ||
+				token->type == TokenType::LITERAL && (token->str == "Nan" || token->str == "Infinity" || token->str == "-Infinity"); 
+			}
+		})})
+		{
+		}
+	} ARBITRARY_PRECISION_NUMBER_ACCEPTOR;
 
 	struct floating_point_predicate
 	{
-		bool operator()(int index, Tokens::const_iterator token){ return token->type == TokenType::FLOATING; }
+		bool operator()(Tokens::const_iterator token){ return token->type == TokenType::FLOATING; }
 	};
 	using FloatingPointAcceptor = GenericAcceptor<floating_point_predicate>;
 
@@ -46,12 +51,12 @@ struct SqlAcceptor
 	
 	struct integer_type_predicate
 	{
-		bool operator()(int index, Tokens::const_iterator token){ 
+		bool operator()(Tokens::const_iterator token){ 
 			std::string lower;
 			lower.resize(token->str.size());
 			std::transform(token->str.cbegin(), token->str.cend(), lower.begin(), [](char c){ return std::tolower(c); });
 			return token->type == TokenType::IDENTIFIER && 
-			find_in_vector(integer_types, index, token->str);
+			find_in_vector(integer_types, 0, token->str);
 		}
 	};
 	using IntegerTypeAcceptor = GenericAcceptor<integer_type_predicate>;
@@ -62,12 +67,12 @@ struct SqlAcceptor
 
 	struct arbitrary_precision_number_type_predicate
 	{
-		bool operator()(int index, Tokens::const_iterator token){ 
+		bool operator()(Tokens::const_iterator token){ 
 			std::string lower;
 			lower.resize(token->str.size());
 			std::transform(token->str.cbegin(), token->str.cend(), lower.begin(), [](char c){return std::tolower(c);});
 			return token->type == TokenType::IDENTIFIER && 
-			find_in_vector(arbitrary_precision_number_types, index, token->str);
+			find_in_vector(arbitrary_precision_number_types, token->str);
 		}
 	};
 	using ArbitraryPrecisionNumberTypeAcceptor = GenericAcceptor<arbitrary_precision_number_type_predicate>;
@@ -77,12 +82,12 @@ struct SqlAcceptor
 	};
 	struct floating_point_type_predicate
 	{
-		bool operator()(int index, Tokens::const_iterator token){ 
+		bool operator()(Tokens::const_iterator token){ 
 			std::string lower;
 			lower.resize(token->str.size());
 			std::transform(token->str.cbegin(), token->str.cend(), lower.begin(), [](char c){return std::tolower(c);});
 			return token->type == TokenType::IDENTIFIER && 
-			find_in_vector(floating_point_types, index, token->str);
+			find_in_vector(floating_point_types, 0, token->str);
 		}
 	};
 	using FloatingPointTypeAcceptor = GenericAcceptor<floating_point_type_predicate>;
@@ -93,7 +98,7 @@ struct SqlAcceptor
 
 	struct FloatingPointType2Acceptor : public Acceptor
 	{
-		FloatingPointType2Acceptor() : Acceptor([](Cursor const& cursor){
+		FloatingPointType2Acceptor() : Acceptor([](size_t index, Cursor const& cursor){
 			auto currentToken = cursor.head;
 			for(auto& vec : floating_point_types2)
 			{
@@ -130,24 +135,24 @@ struct SqlAcceptor
 	};
 	struct serial_type_predicate
 	{
-		bool operator()(int index, Tokens::const_iterator token){ 
+		bool operator()(Tokens::const_iterator token){ 
 			std::string lower;
 			lower.resize(token->str.size());
 			std::transform(token->str.cbegin(), token->str.cend(), lower.begin(), [](char c){return std::tolower(c);});
 			return token->type == TokenType::IDENTIFIER && 
-			find_in_vector(serial_types, index, token->str);
+			find_in_vector(serial_types, 0, token->str);
 		}
 	};
 	using SerialTypeAcceptor = GenericAcceptor<serial_type_predicate>;
 
 	struct free_identifier_predicate
 	{
-		bool operator()(int index, Tokens::const_iterator token){
+		bool operator()(Tokens::const_iterator token){
 			return 
-			!find_in_vector(integer_types, index, token->str) &&
-			!find_in_vector(arbitrary_precision_number_types, index, token->str) &&
-			!find_in_vector(floating_point_types, index, token->str) &&
-			!find_in_vector(serial_types, index, token->str);
+			!find_in_vector(integer_types, 0, token->str) &&
+			!find_in_vector(arbitrary_precision_number_types, 0, token->str) &&
+			!find_in_vector(floating_point_types, 0, token->str) &&
+			!find_in_vector(serial_types, 0, token->str);
 		}
 	};
 	using FreeIdentifierAcceptor = GenericAcceptor<free_identifier_predicate>;
