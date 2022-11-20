@@ -5,21 +5,26 @@
 
 struct SqlAcceptor
 {
-    private:
-	struct integer_predicate
+	struct IntegerAcceptor : public GenericAcceptor
 	{
-		bool operator()(Tokens::const_iterator token){ return token->type == TokenType::INTEGER; }
-	};
-	using IntegerAcceptor = GenericAcceptor<integer_predicate>;
+		IntegerAcceptor() : GenericAcceptor({std::make_shared<std::vector<std::function<bool(Tokens::const_iterator)>>>( {
+			[](Tokens::const_iterator token) { return token->type == TokenType::INTEGER; }
+		})})
+		{
+		}
+	} INTEGER_ACCEPTOR;
 
-	struct arbitrary_precision_number_predicate
+	struct ArbitraryPrecisionNumberAcceptor : public GenericAcceptor
 	{
-		bool operator()(Tokens::const_iterator token){ 
-			return token->type == TokenType::INTEGER || 
-			token->type == TokenType::FLOATING ||
-			token->type == TokenType::LITERAL && (token->str == "Nan" || token->str == "Infinity" || token->str == "-Infinity"); }
-	};
-	using ArbitraryPrecisionNumberAcceptor = GenericAcceptor<arbitrary_precision_number_predicate>;
+		ArbitraryPrecisionNumberAcceptor() : GenericAcceptor({std::make_shared<std::vector<std::function<bool(Tokens::const_iterator)>>>( {
+			[](Tokens::const_iterator token) { return token->type == TokenType::INTEGER || 
+				token->type == TokenType::FLOATING ||
+				token->type == TokenType::LITERAL && (token->str == "Nan" || token->str == "Infinity" || token->str == "-Infinity"); 
+			}
+		})})
+		{
+		}
+	} ARBITRARY_PRECISION_NUMBER_ACCEPTOR;
 
 	struct floating_point_predicate
 	{
@@ -67,7 +72,7 @@ struct SqlAcceptor
 			lower.resize(token->str.size());
 			std::transform(token->str.cbegin(), token->str.cend(), lower.begin(), [](char c){return std::tolower(c);});
 			return token->type == TokenType::IDENTIFIER && 
-			find_in_vector(arbitrary_precision_number_types, 0, token->str);
+			find_in_vector(arbitrary_precision_number_types, token->str);
 		}
 	};
 	using ArbitraryPrecisionNumberTypeAcceptor = GenericAcceptor<arbitrary_precision_number_type_predicate>;
@@ -93,7 +98,7 @@ struct SqlAcceptor
 
 	struct FloatingPointType2Acceptor : public Acceptor
 	{
-		FloatingPointType2Acceptor() : Acceptor([](Cursor const& cursor){
+		FloatingPointType2Acceptor() : Acceptor([](size_t index, Cursor const& cursor){
 			auto currentToken = cursor.head;
 			for(auto& vec : floating_point_types2)
 			{

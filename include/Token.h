@@ -23,6 +23,11 @@ struct Token
 {
 	std::string_view str;
 	size_t type;
+
+	bool operator==(Token const& other)
+	{
+		return str == other.str && type == other.type;
+	}
 };
 
 using Tokens = std::vector<Token>;

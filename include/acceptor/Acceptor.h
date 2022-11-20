@@ -9,31 +9,96 @@ struct AcceptorResult
 	Tokens::const_iterator next;
 };
 
-using AcceptorFunc = std::function<AcceptorResult(Cursor const&)>;
+using RequestFunc = std::function<AcceptorResult(Cursor const&)>;
 
-class Acceptor : public AcceptorFunc
+class Request : public RequestFunc
 {
 public:
-    Acceptor(AcceptorFunc const func, uint64_t const token_count) : AcceptorFunc(func), m_token_count(token_count) {}
+	Request(RequestFunc&& req, std::function<size_t(void)>&& token_count = []{return 1;}) : RequestFunc(std::move(req)), m_token_count(std::move(token_count)) {}
 
-    uint64_t getTokenCount() const { return m_token_count; }
+	size_t getTokenCount() const {return m_token_count();};
 private:
-    uint64_t m_token_count;
-
+	std::function<size_t(void)> m_token_count;
 };
 
-template<typename predicate, typename ... predicates>
+using Requests = std::vector<Request>;
+
+class Acceptor : public Requests
+{
+public:
+	using iterator = Requests::iterator;
+	using const_iterator = Requests::const_iterator;
+};
+
 struct GenericAcceptor : public Acceptor
 {
-	static inline uint64_t const token_count = GenericAcceptor<predicates...>::token_count + 1;
+	GenericAcceptor(std::vector<std::shared_ptr<std::vector<std::function<bool(Tokens::const_iterator)>>>> tokens)
+	{
+		for(auto& tokenv : tokens)
+		{
+			emplace_back([=](Cursor const& cursor) {
+				auto currentToken = cursor.head;
 
-	GenericAcceptor() : Acceptor([](Cursor const& cursor) {
+				for(auto& tokenF : *tokenv)
+				{
+					if(tokenF(currentToken))
+					{
+						++currentToken;
+					}
+					else break;
+				}
+				if(currentToken - cursor.head == tokenv->size())
+					return AcceptorResult { .accepted = true, .next = currentToken };
+				else 
+					return AcceptorResult{ .accepted = false, .next = cursor.head };	
+			}, [=]{ return tokenv->size(); });
+		}		
+	}
+};
+
+struct VectorAcceptor : public Acceptor
+{
+	VectorAcceptor(std::vector<std::shared_ptr<Tokens>> tokens)
+	{
+		for(auto& tokenv : tokens)
+		{
+			emplace_back([=](Cursor const& cursor) {
+				auto currentToken = cursor.head;
+
+				for(Token& token : *tokenv)
+				{
+					if(token == *currentToken)
+					{
+						++currentToken;
+					}
+					else break;
+				}
+				if(currentToken - cursor.head == tokenv->size())
+					return AcceptorResult { .accepted = true, .next = currentToken };
+				else
+					return AcceptorResult { .accepted = false, .next = cursor.head };	
+			}, [=]{ return tokenv->size(); });
+		}		
+	}
+};
+
+struct EpsilonAcceptor : public Acceptor
+{
+	EpsilonAcceptor()
+	{
+		emplace_back([](Cursor const& cursor) { return AcceptorResult { .accepted = true, .next = cursor.head }; }, []{ return 0; });
+	}
+} EPSILON_ACCEPTOR;
+/* 
+struct GenericAcceptor : public Acceptor
+{
+	GenericAcceptor(auto predicate) : Acceptor([](Cursor const& cursor) {
 		auto currentToken = cursor.head;
 		if (predicate()(currentToken))
 		{
 			Tokens::const_iterator next = cursor.head;
 			++next;
-			return GenericAcceptor<predicates...>()(Cursor(cursor.state, next));
+			return GenericAcceptor<then_predicates...>()(Cursor(cursor.state, next));
 		}
 		return AcceptorResult{ .accepted = false, .next = cursor.head };	
 	}, token_count)
@@ -79,3 +144,4 @@ struct pack_predicate
 
 template<typename ... packs>
 using AcceptTokens = GenericAcceptor<pack_predicate<packs>...>;
+ */
